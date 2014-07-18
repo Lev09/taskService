@@ -1,49 +1,47 @@
 <?php
 switch($_SERVER['REQUEST_METHOD']) {
-  case 'GET':
-  get();
-  break;
-  
-  case 'POST':
-  post();
-  break;
-  
-  case 'DELETE':
-  delete();
-  break;
+	case 'GET':
+	get();
+	break;
+
+	case 'POST':
+	post();
+	break;
+
+	case 'DELETE':
+	delete();
+	break;
 }
 
 function get() {
 	// The Query
-  $the_query = new WP_Query( 'post_type=task' );
+	$the_query = new WP_Query( 'post_type=task' );
 
-  // The Loop
-  if ( $the_query->have_posts() ) {
-    
-    while ( $the_query->have_posts() ) {
-	    $the_query->the_post();
-				
-				$postId = get_the_ID();
-				$post = get_post($postId);
-				$cutom_fields = get_post_custom($postId);
-				
-				$newPost;
-				foreach ($post as $key => $value) {
-					$newPost[$key] = $value;
-				};
-				$newPost['cutom_fields'] = $cutom_fields;
-				print_r($newPost);
-    }
-  } else {
-    // no posts found
-  	echo("no posts found");
-  }
-  // Restore original Post Data 
-  wp_reset_postdata();
+	// The Loop
+	if ( $the_query->have_posts() ) {
+	
+		while ( $the_query->have_posts() ) {
+			$the_query->the_post();
+			
+			$postId = get_the_ID();
+			$post = get_post($postId);
+			$cutom_fields = get_post_custom($postId);
+			
+			$newPost['id'] = $postId;
+			$newPost['taskName'] = $cutom_fields['taskName'][0];
+			$newPost['startDate'] = $cutom_fields['startDate'][0];
+			print_r(json_encode($newPost));
+		}
+	} else {
+		// no posts found
+		exit;
+	}
+	// Restore original Post Data 
+	wp_reset_postdata();
 };
 
 function post() {
-	$post = $_REQUEST;
+	$post = $_REQUEST['task'];
 	$metaData = $post['post_meta'];
 	if(empty($post['post_meta'])) {
 		exit("post_meta array is empty");
@@ -59,7 +57,7 @@ function post() {
 };
 
 function delete() {
-	$postId = $_REQUEST['post_id'];
+	$postId = $_REQUEST['task_id'];
 	print_r($_REQUEST);
 	if(empty($postId)) {
 		exit("can't delete without post_id");
