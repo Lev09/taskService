@@ -14,6 +14,9 @@ switch($_SERVER['REQUEST_METHOD']) {
 }
 
 function get() {
+	if (!is_user_logged_in()) {
+		exit();
+	}
 	// The Query
 	$the_query = new WP_Query( 'post_type=task' );
 
@@ -41,11 +44,15 @@ function get() {
 };
 
 function post() {
+	if (!is_user_logged_in()) {
+		exit;
+	}
 	$post = $_REQUEST['task'];
 	$metaData = $post['post_meta'];
 	if(empty($post['post_meta'])) {
 		exit("post_meta array is empty");
 	};
+	//$current_user = wp_get_current_user();
 	
 	$post_id = wp_insert_post( $post, $wp_error );		
 	print_r("created post id is " . $post_id);
@@ -57,6 +64,9 @@ function post() {
 };
 
 function delete() {
+	if (!is_user_logged_in()) {
+		exit;
+	}
 	$postId = $_REQUEST['task_id'];
 	print_r($_REQUEST);
 	if(empty($postId)) {
